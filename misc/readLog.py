@@ -75,9 +75,9 @@ def parseLog(in_path):
                     
     return steps
 
-def printLog(steps, hide_skipped=False, hide_jobs=False, hide_input=False, hide_output=False, hide_dependency_jobs=False, example_job=False):
+def printLog(steps, show_steps=None, hide_skipped=False, hide_jobs=False, hide_input=False, hide_output=False, hide_dependency_jobs=False, example_job=False):
     for step_name, step in steps.iteritems():
-        if hide_skipped and step.skipped:
+        if (hide_skipped and step.skipped) or ((not show_steps is None) and (not step_name in show_steps)):
             continue
         print step_name + (" [SKIPPED]" if step.skipped else "")
         if (not hide_jobs):
@@ -109,12 +109,12 @@ def printLog(steps, hide_skipped=False, hide_jobs=False, hide_input=False, hide_
                         for dependency_job in job.dependency_jobs:
                             print space(3)+str(dependency_job)
 
-def readLog(in_path, hide_skipped=False, hide_jobs=False, hide_input=False, hide_output=False, hide_dependency_jobs=False, example_job=False):
+def readLog(in_path, show_steps=None, hide_skipped=False, hide_jobs=False, hide_input=False, hide_output=False, hide_dependency_jobs=False, example_job=False):
     # Parse the log file.
     steps = parseLog(in_path)
 
     # Print the parsed log file.
-    printLog(steps, hide_skipped, hide_jobs, hide_input, hide_output, hide_dependency_jobs, example_job)
+    printLog(steps, show_steps, hide_skipped, hide_jobs, hide_input, hide_output, hide_dependency_jobs, example_job)
     
 
 if (__name__ == '__main__'):
@@ -127,15 +127,16 @@ if (__name__ == '__main__'):
     parser.add_argument("in_path", help="path log file to be read.")
     
     # Define optional arguments.
-    parser.add_argument("-s", "--hide_skipped", action="store_true", help="hide skipped steps and jobs")
+    parser.add_argument("-f", "--hide_skipped", action="store_true", help="hide skipped steps and jobs")
     parser.add_argument("-j", "--hide_jobs", action="store_true", help="hide jobs")
     parser.add_argument("-i", "--hide_input", action="store_true", help="hide input files")
     parser.add_argument("-o", "--hide_output", action="store_true", help="hide output files")
     parser.add_argument("-d", "--hide_dependency_jobs", action="store_true", help="hide dependency jobs")
     parser.add_argument("-e", "--example_job", action="store_true", help="if a job is performed many times in a step, only show one example of that job")
+    parser.add_argument("-s", "--steps", help="only show information for these steps. Default: show information for all steps in log.", type=str, nargs="+")
     
     # Parse arguments.
     args = parser.parse_args()
 
     # Do stuff.
-    readLog(args.in_path, hide_skipped=args.hide_skipped, hide_jobs=args.hide_jobs, hide_input=args.hide_input, hide_output=args.hide_output, hide_dependency_jobs=args.hide_dependency_jobs, example_job=args.example_job)
+    readLog(args.in_path, show_steps=args.steps, hide_skipped=args.hide_skipped, hide_jobs=args.hide_jobs, hide_input=args.hide_input, hide_output=args.hide_output, hide_dependency_jobs=args.hide_dependency_jobs, example_job=args.example_job)
